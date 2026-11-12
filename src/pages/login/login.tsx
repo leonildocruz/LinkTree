@@ -20,7 +20,6 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      console.log("logado com sucesso");
       navigate("/admin");
     } catch (error) {
       console.log(`Falha ao acessar usuario! ${error}`);

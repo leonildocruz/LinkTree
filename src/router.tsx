@@ -5,6 +5,7 @@ import Login from "./pages/login/login";
 import NotFound from "./pages/notfound/notfound";
 import Layout from "./components/layout";
 import Network from "./pages/network.tsx/network";
+import { Private } from "./router/private";
 
 export const routerApp = createBrowserRouter([
   {
@@ -20,7 +21,11 @@ export const routerApp = createBrowserRouter([
       },
       {
         path: "/admin",
-        element: <Admin />,
+        element: (
+          <Private>
+            <Admin />
+          </Private>
+        ),
       },
       {
         path: "/admin/social",
