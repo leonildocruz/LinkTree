@@ -22,6 +22,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/admin");
     } catch (error) {
+      alert("Email ou senha icorreta!");
       console.log(`Falha ao acessar usuario! ${error}`);
     }
   }

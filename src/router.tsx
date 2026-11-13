@@ -9,16 +9,16 @@ import { Private } from "./router/private";
 
 export const routerApp = createBrowserRouter([
   {
+    path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
     element: <Layout />,
     children: [
-      {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/login",
-        element: <Login />,
-      },
       {
         path: "/admin",
         element: (
@@ -29,7 +29,11 @@ export const routerApp = createBrowserRouter([
       },
       {
         path: "/admin/social",
-        element: <Network />,
+        element: (
+          <Private>
+            <Network />{" "}
+          </Private>
+        ),
       },
       {
         path: "*",
