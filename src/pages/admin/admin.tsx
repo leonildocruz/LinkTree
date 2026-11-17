@@ -1,14 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "../../components/input/input";
 import { FiTrash } from "react-icons/fi";
-import { addDoc, collection } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+} from "firebase/firestore";
 import { db } from "../../services/firebaseConnection";
+
+interface Linkprops {
+  id: string;
+  name: string;
+  url: string;
+  bg: string;
+  color: string;
+}
 
 export default function Admin() {
   const [nameInput, setNameInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const [textColorInput, setTextColorInput] = useState("#121212");
   const [bgColorInput, setBgColorInput] = useState("#fff");
+  const [link, setLinks] = useState<Linkprops[]>([]);
+
+  useEffect(() => {
+    const linksRef = collection(db, "links");
+    const queryRaf = query(linksRef, orderBy("created", "asc"));
+
+    const unsub = onSnapshot(queryRaf, (snapshot) => {
+      const lista = [] as Linkprops[];
+
+      snapshot.forEach((doc) => {
+        lista.push({
+          id: doc.id,
+          name: doc.data().name,
+          url: doc.data().url,
+          bg: doc.data().bg,
+          color: doc.data().color,
+        });
+      });
+      setLinks(lista);
+    });
+
+    return () => {
+      unsub();
+    };
+  }, []);
 
   async function HandleRegister(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,6 +72,11 @@ export default function Admin() {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function handleDeletLink(id: string) {
+    const docRef = doc(db, "links", id);
+    await deleteDoc(docRef);
   }
 
   return (
@@ -60,17 +106,6 @@ export default function Admin() {
           <div className="flex items-center justify-around">
             <div className="flex items-center gap-2">
               <label className="text-white font-medium text-xl ">
-                Cor do Link
-              </label>
-              <input
-                className="h-10"
-                type="color"
-                value={textColorInput}
-                onChange={(e) => setTextColorInput(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-white font-medium text-xl ">
                 Fundo do Link
               </label>
               <input
@@ -78,6 +113,17 @@ export default function Admin() {
                 type="color"
                 value={bgColorInput}
                 onChange={(e) => setBgColorInput(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-white font-medium text-xl ">
+                Cor do Link
+              </label>
+              <input
+                className="h-10"
+                type="color"
+                value={textColorInput}
+                onChange={(e) => setTextColorInput(e.target.value)}
               />
             </div>
           </div>
@@ -113,18 +159,32 @@ export default function Admin() {
       </form>
 
       <h2 className="font-bold text-white text-2xl mb-4 mt-4">Meus links</h2>
-      <article
-        className=" flex items-center justify-between w-11/12 max-w-xl rounded-md p-2 select-none"
-        style={{ backgroundColor: "#000", color: "#ffff" }}
-      >
-        <p>canal do youtu </p>
+      <div className="flex items-center w-11/12 max-w-xl flex-col gap-2">
+        {link.map((link) => {
+          const iconColor = link.color || "#ffffff";
 
-        <div>
-          <button className="transition-all hover:scale-108 hover:rounded-full  cursor-pointer flex">
-            <FiTrash size={18} color="#fff" />
-          </button>
-        </div>
-      </article>
+          const finalIconColor = iconColor === link.bg ? "#000000" : iconColor;
+
+          return (
+            <article
+              key={link.id}
+              className=" flex items-center justify-between w-full  rounded-md p-2 select-none"
+              style={{ backgroundColor: link.bg, color: link.color }}
+            >
+              <p>{link.name}</p>
+
+              <div>
+                <button
+                  onClick={() => handleDeletLink(link.id)}
+                  className="transition-all hover:scale-108 hover:rounded-full cursor-pointer flex"
+                >
+                  <FiTrash size={18} color={finalIconColor} />
+                </button>
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
