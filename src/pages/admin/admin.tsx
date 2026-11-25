@@ -53,15 +53,18 @@ export default function Admin() {
 
   async function HandleRegister(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (nameInput === "" || urlInput === "") {
+    const name = nameInput.trim();
+    const url = urlInput.trim();
+
+    if (name === "" || url === "") {
       alert("Prenche todos os campos");
       return;
     }
 
     try {
       await addDoc(collection(db, "links"), {
-        name: nameInput,
-        url: urlInput,
+        name,
+        url,
         bg: bgColorInput,
         color: textColorInput,
         created: new Date(),
